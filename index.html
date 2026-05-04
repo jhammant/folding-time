@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Folding Time: an interactive explainer on AlphaFold, protein structure prediction, and the proteome-scale shift in biology." />
+  <title>Folding Time — How AI mapped the proteome</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="topnav" aria-label="Section navigation">
+    <a href="#problem">The Problem</a><span>·</span><a href="#slow-map">The Slow Map</a><span>·</span><a href="#casp">CASP</a><span>·</span><a href="#model">The Model</a><span>·</span><a href="#leap">The Leap</a><span>·</span><a href="#design">Design</a><span>·</span><a href="#medicine">Medicine</a><span>·</span><a href="#caveats">Caveats</a>
+  </nav>
+
+  <header class="hero shell">
+    <p class="kicker">AI for biology · interactive explainer</p>
+    <h1>Folding Time</h1>
+    <p class="subtitle">How AI mapped the proteome in a year, and what that unlocked.</p>
+    <p class="standfirst">For fifty years, determining a protein's shape was a career. Then a model read evolution and did two hundred million of them.</p>
+    <div class="hero-actions">
+      <a class="button" href="#problem">Start the story</a>
+      <a class="button ghost" href="#leap">Skip to the leap</a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section id="problem" class="story-section">
+      <p class="section-mark">§ the problem</p>
+      <h2>A chain of amino acids has more possible folds than there are atoms in the universe.</h2>
+      <blockquote>“How does a protein find its native conformation?” <cite>Levinthal, paraphrased from the 1969 paradox</cite></blockquote>
+      <p class="bridge">Source → interaction<br><span>Levinthal's paradox becomes a counter: change the chain length and watch the search space leave ordinary intuition.</span></p>
+      <p class="claim">A 100-residue protein is often used to illustrate the problem: if each residue had only three coarse choices, the chain would still have about 3<sup>100</sup>, or 10<sup>47</sup>, possible conformations. <span class="hovercite" tabindex="0">Hover for paper text<span class="tip">Levinthal argued that exhaustive random search cannot explain biological folding. The precise numbers vary by coarse-graining, but the conclusion is stable: proteins fold far faster than blind enumeration permits. <a href="https://doi.org/10.1016/B978-0-12-395550-5.50016-3">Levinthal, 1969</a></span></span></p>
+      <p>Anfinsen's dogma says that sequence contains the information for structure. Levinthal's paradox says the route from one to the other cannot be brute force. A protein folds in water, buffeted by thermal motion, yet lands in a functional shape on human timescales.</p>
+      <p>The gap between possible and realised folds is the old problem. AlphaFold did not make that gap disappear. It learned to exploit the record evolution left behind.</p>
+      <div class="widget split">
+        <div>
+          <label class="control">Protein length <strong id="lenVal">100</strong> residues<input id="lenSlider" type="range" min="10" max="300" value="100" /></label>
+          <div class="readout"><span>≈ 3<sup>N</sup> conformations</span><strong id="confSci">5.15 × 10^47</strong><small id="confCompare">smaller than the atoms-in-the-universe benchmark, but already biologically impossible to search.</small></div>
+        </div>
+        <div class="chainbox">
+          <button id="foldBtn" class="smallbtn">Fold the toy chain</button>
+          <svg id="chainSvg" viewBox="0 0 420 220" role="img" aria-label="Toy protein chain"></svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="slow-map" class="story-section">
+      <p class="section-mark">§ the slow map</p>
+      <h2>Fifty years of crystallography produced about 200,000 structures.</h2>
+      <blockquote>“The Protein Data Bank archive passed 200,000 entries in 2023.” <cite>RCSB PDB milestone, paraphrased</cite></blockquote>
+      <p class="bridge">Source → interaction<br><span>The graph starts with experimental structure determination, then rescales when AlphaFold DB is added.</span></p>
+      <p>X-ray crystallography, NMR and cryo-EM are among the great instruments of modern biology. They are also slow. A structure can mean expression, purification, crystals that refuse to grow, months of beamtime logistics, and a result that may still fail.</p>
+      <p>The PDB was founded in 1971 with a handful of structures. By the end of 2020 it held roughly 170,000 entries; it crossed 200,000 in early 2023. <span class="hovercite" tabindex="0">Hover for source text<span class="tip">RCSB PDB announced the archive had more than 200,000 entries in January 2023. PDB growth statistics place the 2020 archive in the high-160k range. <a href="https://www.rcsb.org/news/639b9e337f8444f313d20414">RCSB milestone</a></span></span></p>
+      <div class="widget">
+        <div class="chart-head"><strong>Cumulative structures</strong><button id="addAF" class="smallbtn">Add AlphaFold DB</button></div>
+        <svg id="growthChart" class="chart" viewBox="0 0 760 360" role="img" aria-label="PDB and AlphaFold growth chart"></svg>
+        <p class="caption">The rescale is the point. The experimental archive remains essential; against 200 million predictions, it becomes the calibration line at the bottom of the page.</p>
+      </div>
+    </section>
+
+    <section id="casp" class="story-section">
+      <p class="section-mark">§ CASP, the contest that broke the problem</p>
+      <h2>In 2020, a research group entered a biennial accuracy competition and ended it.</h2>
+      <blockquote>“In some sense the problem is solved.” <cite>John Moult, CASP14 announcement, widely quoted</cite></blockquote>
+      <p class="bridge">Source → interaction<br><span>CASP is a blind test. The scoreboard shows why CASP14 changed the field's posture.</span></p>
+      <p>CASP asks groups to predict structures before the experimental answers are public. Its GDT_TS score runs from 0 to 100; around 90 is commonly treated as competitive with experiment for many targets.</p>
+      <p>AlphaFold 1 won CASP13 in 2018. AlphaFold 2 then reached a median domain GDT_TS of 92.4 at CASP14. <span class="hovercite" tabindex="0">Hover for source text<span class="tip">The AlphaFold CASP14 paper reports median domain GDT_TS of 92.4, the first time this level of average accuracy had been achieved in CASP. <a href="https://www.nature.com/articles/s41586-021-03819-2">Jumper et al., Nature 2021</a></span></span></p>
+      <div class="widget">
+        <svg id="caspChart" class="chart" viewBox="0 0 760 360" role="img" aria-label="CASP accuracy scoreboard"></svg>
+        <div id="caspNote" class="note">Hover or focus a bar for details.</div>
+      </div>
+    </section>
+
+    <section id="model" class="story-section">
+      <p class="section-mark">§ what changed inside the model</p>
+      <h2>Evolution wrote the answers in the margins.</h2>
+      <blockquote>“AlphaFold greatly improves the accuracy of structure prediction by incorporating novel neural network architectures and training procedures based on evolutionary, physical and geometric constraints.” <cite>Jumper et al., 2021</cite></blockquote>
+      <p class="bridge">Source → interaction<br><span>The sandbox turns a multiple sequence alignment into a toy contact map.</span></p>
+      <p>AlphaFold 2 does not read one protein sequence in isolation. It reads a multiple sequence alignment: the same family of proteins as it appears across species. If two residues change together, they may be compensating for each other because they touch in the folded protein.</p>
+      <p>The model's Evoformer uses attention over residues and residue pairs, then a structure module iteratively refines coordinates. The intuition is simpler than the machinery: it learns which letters are talking to each other.</p>
+      <div class="widget split">
+        <div>
+          <label class="control">Mutation pressure <strong id="mutVal">40%</strong><input id="mutSlider" type="range" min="0" max="100" value="40" /></label>
+          <div id="msaGrid" class="msa" role="img" aria-label="Toy multiple sequence alignment"></div>
+        </div>
+        <div>
+          <h3 class="minihead">Predicted contacts</h3>
+          <svg id="contactMap" class="contact" viewBox="0 0 260 260" role="img" aria-label="Toy contact map"></svg>
+          <p class="caption">Highlighted columns co-mutate. Stronger co-mutation lights up a contact.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="leap" class="story-section feature">
+      <p class="section-mark">§ the leap</p>
+      <h2>Then they ran it on every protein.</h2>
+      <blockquote>“AlphaFold DB provides open access to over 200 million protein structure predictions.” <cite>Google DeepMind and EMBL-EBI</cite></blockquote>
+      <p class="bridge">Source → interaction<br><span>The comparison moves from countable history to proteome-scale inference.</span></p>
+      <p>AlphaFold DB first opened in 2021 with hundreds of thousands of predictions. In 2022 it expanded to more than 200 million, covering broad UniProt space. <span class="hovercite" tabindex="0">Hover for source text<span class="tip">AlphaFold DB states that the latest database release contains over 200 million entries, with broad coverage of UniProt. <a href="https://alphafold.ebi.ac.uk/">AlphaFold DB</a></span></span></p>
+      <p>The comparison is not that predictions equal experiments. The comparison is that biology suddenly had plausible starting shapes for a thousand times more proteins than experiment had measured.</p>
+      <div class="widget">
+        <div class="odometer-row">
+          <div class="odo"><span>Experimental structures</span><strong id="expCount">217,000</strong></div>
+          <div class="odo accent"><span>AlphaFold predictions</span><strong id="afCount">0</strong></div>
+        </div>
+        <button id="runOdo" class="smallbtn">Run the comparison</button>
+        <button id="areaToggle" class="smallbtn ghostbtn">Show as area</button>
+        <div id="areaView" class="area-view" hidden><div class="tiny-square" title="Experimental"></div><div class="big-square" title="AlphaFold"></div></div>
+        <p class="caption">If the small square is one human lifetime of experimental work, the large square is one inference run.</p>
+      </div>
+    </section>
+
+    <section id="design" class="story-section">
+      <p class="section-mark">§ beyond folding — generative biology</p>
+      <h2>Once you can read structures, you can write them.</h2>
+      <blockquote>“RFdiffusion enables the design of functional proteins from simple molecular specifications.” <cite>Watson et al., Nature 2023, paraphrased</cite></blockquote>
+      <p class="bridge">Source → interaction<br><span>A UI metaphor shows the new pipeline: sketch a backbone, then assign a sequence.</span></p>
+      <p>AlphaFold 3 extends prediction to interactions among proteins, ligands, nucleic acids and antibodies. Protein language models such as ESMFold trade some accuracy for speed and MSA-free scale. RFdiffusion and ProteinMPNN move in the other direction: from desired shape or binding geometry towards a candidate protein.</p>
+      <p>This is where synthetic biology begins to feel less like editing and more like authoring. The output is still a proposal for wet labs, not a finished organism or drug.</p>
+      <div class="widget split">
+        <div>
+          <label class="control">Target shape<select id="shapePick"><option>helix bundle</option><option>binding pocket</option><option>alpha/beta sandwich</option></select></label>
+          <button id="designBtn" class="smallbtn">Design</button>
+          <p class="caption">This animation is a metaphor. No model runs in the browser.</p>
+        </div>
+        <svg id="designSvg" class="designsvg" viewBox="0 0 460 260" role="img" aria-label="Protein design metaphor"></svg>
+      </div>
+    </section>
+
+    <section id="medicine" class="story-section">
+      <p class="section-mark">§ what it unlocks in medicine</p>
+      <h2>Targets that used to be undruggable now have shapes.</h2>
+      <blockquote>“AlphaFold is already enabling biologists to accelerate their work.” <cite>DeepMind and EMBL-EBI, paraphrased</cite></blockquote>
+      <p class="bridge">Source → interaction<br><span>The funnel shows where structure prediction helps, and where it stops helping.</span></p>
+      <p>Structure used to gate entire drug programmes. A target without a shape was harder to screen, dock, engineer around or explain. AlphaFold moves that bottleneck, especially for neglected organisms and poorly characterised proteins.</p>
+      <p>But the funnel remains a funnel. Virtual screening can widen the top. Better structures can improve hit finding and design. Wet-lab validation, manufacturability, toxicity and clinical trials still decide what becomes medicine. <span class="hovercite" tabindex="0">Hover for note<span class="tip">The neglected-disease and PETase examples should be treated as pointers, not claims of completed drugs. The defensible claim here is bottleneck movement: structure is less often the first rate limiter.</span></span></p>
+      <div class="widget">
+        <div class="togglebar"><button id="preAI" class="smallbtn active">Pre-AI</button><button id="postAI" class="smallbtn ghostbtn">Post-AI</button></div>
+        <svg id="funnelSvg" class="chart" viewBox="0 0 760 330" role="img" aria-label="Drug discovery funnel"></svg>
+        <div id="funnelNote" class="note">Hover a stage to inspect the bottleneck.</div>
+      </div>
+    </section>
+
+    <section id="caveats" class="story-section coda">
+      <p class="section-mark">§ what AI does not yet solve</p>
+      <h2>A predicted fold is not the same thing as a working biology.</h2>
+      <blockquote>“Users should interpret AlphaFold predictions with appropriate caution.” <cite>AlphaFold DB FAQ, paraphrased</cite></blockquote>
+      <p class="bridge">Source → interaction<br><span>The confidence inspector keeps the prediction/measurement distinction visible.</span></p>
+      <p>Proteins move. Many function through dynamics, allostery, flexible loops or disordered regions. Some proteins have no single fold. Novel designs can look confident and still fail expression, binding, stability or safety tests.</p>
+      <p>pLDDT helps: high confidence regions are often useful; low confidence regions are warnings. But the model will still return coordinates. Biology has not been solved. One bottleneck was compressed.</p>
+      <div class="widget split">
+        <div class="protein-tabs"><button class="proteinBtn smallbtn active" data-protein="globular">Globular domain</button><button class="proteinBtn smallbtn ghostbtn" data-protein="loop">Antibody loop</button><button class="proteinBtn smallbtn ghostbtn" data-protein="tail">Disordered tail</button></div>
+        <div>
+          <svg id="proteinSvg" class="designsvg" viewBox="0 0 460 240" role="img" aria-label="Confidence ribbon"></svg>
+          <p id="proteinNote" class="caption"></p>
+        </div>
+      </div>
+      <p class="closing">This is a map of what changed, not a claim that biology is solved.</p>
+    </section>
+  </main>
+
+  <footer class="shell footer">Built as an educational companion from public sources: Levinthal 1969; RCSB PDB; CASP; Jumper et al. Nature 2021; AlphaFold DB; AlphaFold 3; ESMFold; RFdiffusion and ProteinMPNN. No live biological model runs on this page.</footer>
+  <script src="app.js"></script>
+</body>
+</html>
